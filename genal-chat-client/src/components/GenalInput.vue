@@ -1,5 +1,5 @@
 <template>
-  <div class="message-input" v-if="activeRoom">
+  <div class="message-input" @mousedown.stop v-if="activeRoom">
     <a-popover placement="topLeft" trigger="hover" class="message-popver">
       <template slot="content">
         <a-tabs default-key="1" size="small">
@@ -38,6 +38,7 @@
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import GenalEmoji from './GenalEmoji.vue';
 import { namespace } from 'vuex-class';
+import { uploadImage } from '@/api/apis';
 const chatModule = namespace('chat');
 const appModule = namespace('app');
 
@@ -120,10 +121,11 @@ export default class GenalInput extends Vue {
       this.$message.error('消息太长!');
       return;
     }
+    const isImageURL = (url: string) => /\.(jpeg|jpg|gif|png|bmp)$/i.test(url);
     if (this.activeRoom.groupId) {
-      this.sendMessage({ type: 'group', message: this.text, messageType: 'text' });
+      this.sendMessage({ type: 'group', message: this.text, messageType: isImageURL(this.text)? 'image':'text' });
     } else {
-      this.sendMessage({ type: 'friend', message: this.text, messageType: 'text' });
+      this.sendMessage({ type: 'friend', message: this.text, messageType: isImageURL(this.text)? 'image':'text' });
     }
     this.text = '';
   }
@@ -251,13 +253,23 @@ export default class GenalInput extends Vue {
     image.src = url.createObjectURL(imageFile);
     image.onload = () => {
       let imageSize: ImageSize = this.getImageSize({ width: image.width, height: image.height });
-      this.sendMessage({
-        type: this.activeRoom.groupId ? 'group' : 'friend',
-        message: imageFile,
-        width: imageSize.width,
-        height: imageSize.height,
-        messageType: 'image',
-      });
+      const formData = new FormData();
+      formData.append('smfile',imageFile, imageFile.name);
+      formData.append('file_id', "0");
+      formData.append('nsfw', "0");
+      uploadImage(formData).then(response => {
+        let imageUrl ;
+        response.data.data.url?(imageUrl = response.data.data.url) : (imageUrl = response.data.images)
+        this.sendMessage({
+          type: this.activeRoom.groupId ? 'group' : 'friend',
+          message:  imageUrl,
+          width: imageSize.width,
+          height: imageSize.height,
+          messageType: 'image',
+        });
+      })
+      
+      
     };
   }
 }

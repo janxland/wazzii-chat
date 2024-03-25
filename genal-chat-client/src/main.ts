@@ -5,7 +5,55 @@ import store from './store';
 import Viewer from 'v-viewer';
 
 Vue.config.productionTip = false;
-
+Vue.directive('drag', {
+  bind(el) {
+    let setPos={
+      x:0,
+      y:0
+    }
+    let lastPos={
+      x:0,
+      y:0
+    };
+    function move(curPos: { x: any; y: any; }){
+      const d={
+        dX:curPos.x-lastPos.x,
+        dY:curPos.y-lastPos.y
+      };
+      setPos.x+=d.dX;
+      setPos.y+=d.dY;
+      el.style.transform=`translate(${setPos.x}px,${setPos.y}px)`;
+      lastPos.x=curPos.x;
+      lastPos.y=curPos.y;
+    }
+    el.addEventListener("mousedown",(e)=>{
+      e.stopPropagation();
+      document.body.style.userSelect = 'none';
+      lastPos.x=e.clientX;
+      lastPos.y=e.clientY;
+      document.addEventListener('mousemove',mouseMove);
+      document.addEventListener('mouseup',mouseUp)
+    });
+    function mouseMove(e: { clientX: any; clientY: any; }) {
+      const curPos={
+        x:e.clientX,
+        y:e.clientY
+      }
+      move(curPos)
+    }
+    function mouseUp(e: { stopPropagation: () => void; clientX: any; clientY: any; }) {
+      e.stopPropagation();
+      const curPos={
+        x:e.clientX,
+        y:e.clientY
+      };
+      move(curPos);
+      document.body.style.userSelect = '';
+      document.removeEventListener("mousemove",mouseMove);
+      document.removeEventListener('mouseup',mouseUp)
+    }
+  }
+});
 // 引入ant-desigin
 import './ant-desigin';
 

@@ -16,7 +16,7 @@
     <a-icon type="skin" class="tool-skin icon" @click="showBackgroundModal = true" />
     <a href="https://github.com/genaller/genal-chat" target="_blank" class="tool-github icon"><a-icon type="github"/></a>
     <a-icon class="tool-out icon" type="poweroff" @click="logout" />
-    <a-modal title="用户信息" :visible="showUserModal" footer="" @cancel="showUserModal = false">
+    <a-modal style="width: 300px !important;" title="用户信息" :visible="showUserModal" footer="" @cancel="showUserModal = false">
       <div class="tool-user">
         <div
           @mouseover="showUpload = true"
@@ -42,6 +42,11 @@
           <div class="tool-user-title">更改密码</div>
           <a-input-password class="tool-user-input" v-model="password" placeholder="请输入密码"></a-input-password>
           <a-button type="primary" @click="changePassword">确认</a-button>
+        </div>
+        <div class="tool-user-info">
+          <div class="tool-user-title">绑定QQ</div>
+          <a-input class="tool-user-input" v-model="qq" placeholder="请输入QQ号"></a-input>
+          <a-button type="primary" @click="changeUserQQ">确认</a-button>
         </div>
       </div>
     </a-modal>
@@ -149,6 +154,7 @@ export default class GenalTool extends Vue {
 
   username: string = '';
   password: string = '';
+  qq: string = '';
   background: string = '';
   uploading: boolean = false;
   avatar: any = '';
@@ -157,11 +163,13 @@ export default class GenalTool extends Vue {
   userChange() {
     this.username = this.user.username;
     this.password = this.user.password;
+    this.qq = this.user.qq;
   }
 
   created() {
     this.username = this.user.username;
     this.password = this.user.password;
+    this.qq = this.user.qq;
   }
 
   logout() {
@@ -198,6 +206,7 @@ export default class GenalTool extends Vue {
       return;
     }
     let user: User = JSON.parse(JSON.stringify(this.user));
+    user.password = this.password;
     let res = await apis.patchPassword(user, this.password);
     let data = processReturn(res);
     if (data) {
@@ -205,7 +214,18 @@ export default class GenalTool extends Vue {
       this.setUserGather(data);
     }
   }
-
+  async changeUserQQ() {
+    let user: User = JSON.parse(JSON.stringify(this.user));
+    console.log(user);
+    
+    user.qq = this.qq;
+    let res = await apis.patchQQ(user, this.qq);
+    let data = processReturn(res);
+    if (data) {
+      this.setUser(data);
+      this.setUserGather(data);
+    }
+  }
   beforeUpload(file: any) {
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpg' || file.type === 'image/gif';
     if (!isJpgOrPng) {
@@ -350,6 +370,7 @@ export default class GenalTool extends Vue {
   display: flex;
   justify-content: left;
   align-items: center;
+  margin: 8px 0;
   .tool-user-input {
     flex: 1;
     margin-right: 5px;
@@ -362,9 +383,6 @@ export default class GenalTool extends Vue {
     font-weight: bold;
     word-break: keep-all;
     margin-right: 15px;
-  }
-  &:nth-child(2) {
-    margin-bottom: 15px;
   }
 }
 

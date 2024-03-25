@@ -1,6 +1,10 @@
 <template>
   <div
     class="chat"
+    :class="{ 'full-screen': visibleFullScreen }"
+    
+    @dblclick.stop="visibleFullScreen = !visibleFullScreen"
+    v-drag
     :style="{
       '--bg-image': `url('${background}')`,
     }"
@@ -70,7 +74,7 @@ export default class GenalChat extends Vue {
   showModal: boolean = false;
   visibleDrawer: boolean = false;
   visibleTool: boolean = true;
-
+  visibleFullScreen: boolean = false;
   created() {
     if (!this.user.userId) {
       this.showModal = true;
@@ -151,6 +155,14 @@ export default class GenalChat extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+.chat.full-screen {
+  height: 100vh !important;
+  width: 100vw !important;
+  margin: 0 !important;
+  transform: unset !important;
+  max-width: unset;
+  max-height: unset;
+}
 .chat {
   font-size: 16px;
   z-index: 999;

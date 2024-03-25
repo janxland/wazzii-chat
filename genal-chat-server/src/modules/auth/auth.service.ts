@@ -50,7 +50,7 @@ export class AuthService {
     const payload = {userId: newUser.userId, password: newUser.password};
     await this.groupUserRepository.save({
       userId: newUser.userId,
-      groupId: '阿童木聊天室',
+      groupId: '公共聊天室',
     });
     return {
       msg:'注册成功',

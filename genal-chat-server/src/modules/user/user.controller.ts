@@ -19,6 +19,10 @@ export class UserController {
   postUsers(@Body('userIds') userIds: string) {
     return this.userService.postUsers(userIds);
   }
+  @Patch('qq')
+  updateQQ(@Body() user) {
+    return this.userService.updateQQ(user);
+  }
 
   @Patch('username')
   updateUserName(@Body() user) {

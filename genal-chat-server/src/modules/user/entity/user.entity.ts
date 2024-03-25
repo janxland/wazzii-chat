@@ -17,6 +17,9 @@ export class User {
   @Column({ default: 'user' })
   role: string;
 
+  @Column({ default: '0' })
+  qq: string;
+  
   @Column({ default: 'on' })
   status: string;
 

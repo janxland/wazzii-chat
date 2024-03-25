@@ -34,7 +34,7 @@ export class ChatGateway {
     @InjectRepository(FriendMessage)
     private readonly friendMessageRepository: Repository<FriendMessage>,
   ) {
-    this.defaultGroup = '阿童木聊天室';
+    this.defaultGroup = '公共聊天室';
   }
 
   @WebSocketServer()
@@ -46,7 +46,7 @@ export class ChatGateway {
   // socket连接钩子
   async handleConnection(client: Socket): Promise<string> {
     const userRoom = client.handshake.query.userId;
-    // 连接默认加入"阿童木聊天室"房间
+    // 连接默认加入"公共聊天室"房间
     client.join(this.defaultGroup);
     // 进来统计一下在线人数
     this.getActiveGroupUser();
@@ -138,12 +138,12 @@ export class ChatGateway {
         this.server.to(data.userId).emit('groupMessage',{code:RCode.FAIL, msg:'群消息发送错误', data: ''});
         return;
       } 
-      if(data.messageType === 'image') {
-        const randomName = `${Date.now()}$${data.userId}$${data.width}$${data.height}`;
-        const stream = createWriteStream(join('public/static', randomName));
-        stream.write(data.content);
-        data.content = randomName;
-      }
+      // if(data.messageType === 'image') {
+      //   const randomName = `${Date.now()}$${data.userId}$${data.width}$${data.height}`;
+      //   const stream = createWriteStream(join('public/static', randomName));
+      //   stream.write(data.content);
+      //   data.content = randomName;
+      // }
       data.time = new Date().valueOf(); // 使用服务端时间
       await this.groupMessageRepository.save(data);
       this.server.to(data.groupId).emit('groupMessage', {code: RCode.OK, msg:'', data: data});
@@ -233,12 +233,12 @@ export class ChatGateway {
     if(isUser) {
       if(data.userId && data.friendId) {
         const roomId = data.userId > data.friendId ? data.userId + data.friendId : data.friendId + data.userId;
-        if(data.messageType === 'image') {
-          const randomName = `${Date.now()}$${roomId}$${data.width}$${data.height}`;
-          const stream = createWriteStream(join('public/static', randomName));
-          stream.write(data.content);
-          data.content = randomName;
-        }
+        // if(data.messageType === 'image') {
+        //   const randomName = `${Date.now()}$${roomId}$${data.width}$${data.height}`;
+        //   const stream = createWriteStream(join('public/static', randomName));
+        //   stream.write(data.content);
+        //   data.content = randomName;
+        // }
         data.time = new Date().valueOf();
         await this.friendMessageRepository.save(data);
         this.server.to(roomId).emit('friendMessage', {code: RCode.OK, msg:'', data});

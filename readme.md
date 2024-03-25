@@ -25,6 +25,13 @@
   <img src="./assets/v6_m1.png" alt="Mobile" width="350"/><img src="./assets/v6_m2.png" alt="Mobile" width="350"  hspace="50"/>
 </p>
 
+### 修改内容
+- 添加窗口移动，窗口全屏
+- 添加sm.ms图床代替本地图片
+- 与自己的FlexiSite项目进行整合
+- 通用表情包
+- 添加QQ号，用于自动头像（QQ头像）节省资源
+
 ### 功能介绍
 - 移动端兼容
 - 用户信息的修改(头像/用户名/密码)

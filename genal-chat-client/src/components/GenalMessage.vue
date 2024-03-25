@@ -13,7 +13,7 @@
         <a-icon type="sync" spin class="message-loading-icon" />
       </div>
     </transition>
-    <div class="message-main" :style="{ opacity: messageOpacity }">
+    <div class="message-main"  @mousedown.stop :style="{ opacity: messageOpacity }">
       <div class="message-content">
         <transition name="noData">
           <div class="message-content-noData" v-if="isNoData">没有更多消息了~</div>
@@ -22,11 +22,11 @@
           <div class="message-content-message" :key="item.userId + item.time" :class="{ 'text-right': item.userId === user.userId }">
             <genal-avatar :data="item"></genal-avatar>
             <div>
-              <a class="message-content-text" v-if="_isUrl(item.content)" :href="item.content" target="_blank">{{ item.content }}</a>
-              <div class="message-content-text" v-text="_parseText(item.content)" v-else-if="item.messageType === 'text'"></div>
+             
+              <div class="message-content-text" ref="contentContainer" v-html="_parseText(item.content)" v-if="item.messageType === 'text'"></div>
               <div class="message-content-image" v-if="item.messageType === 'image'" :style="getImageStyle(item.content)">
                 <viewer style="display:flex;align-items:center;">
-                  <img :src="'api/static/' + item.content" alt="" />
+                  <img :src="item.content" alt="" />
                 </viewer>
               </div>
             </div>
@@ -295,7 +295,28 @@ export default class GenalMessage extends Vue {
    * @params text
    */
   _parseText(text: string) {
-    return parseText(text);
+    text = text.replace(/\[[^\[^\]]+\]/g, (word) => {
+      let arr: any[] = [];
+      const emojiData = localStorage.getItem("EMOJI");
+      let new_EMOJI: any[] = [];
+      if (emojiData) {
+        new_EMOJI = JSON.parse(emojiData);
+      }
+      new_EMOJI.forEach((element: { emote: any; }) => {
+        arr = arr.concat(element.emote);
+      });
+      let index = arr.findIndex(function(item) {
+        return item.text === word;
+      });
+      if (index > -1) {
+        let url = arr[index].url
+        return '<img style="vertical-align: middle;width: 32px;height: 32px" src="' + url + '" title="' + word + '"/>';
+      } else {
+        return word;
+      }
+    });
+    return text;
+    // return parseText(text);
   }
 
   /**
@@ -366,8 +387,9 @@ export default class GenalMessage extends Vue {
           max-width: 350px;
           img {
             cursor: pointer;
-            max-width: 335px;
-            max-height: 335px;
+            object-fit: cover;
+            height: 100%;
+            width: 100%;
           }
         }
       }
@@ -443,7 +465,6 @@ export default class GenalMessage extends Vue {
     .message-content-image {
       img {
         cursor: pointer;
-        max-width: 138px !important;
         height: inherit !important;
       }
     }

@@ -88,6 +88,24 @@ module.exports = {
   devServer: {
     port: 1997,
     proxy: {
+      '/image/upload': {
+          target:'https://sm.ms/api/v2/upload',//这里填入你要请求的接口的前缀
+          // ws:true,//代理websocked
+          changeOrigin:true,//虚拟的站点需要更管origin
+          secure: true,                   //是否https接口
+          pathRewrite:{
+              '^/image/upload':''//重写路径
+          }
+      },
+      '/api/kv': {
+        // target: 'http://localhost:3000/',
+        target: 'https://www.roginx.ink/api/kv/',
+        ws: false,
+        changeOrigin: true,
+        pathRewrite: {
+            '/api/kv': '/' 
+        }
+      },
       '/api': {
         target: Host,
         ws: true,

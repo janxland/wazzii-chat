@@ -85,7 +85,7 @@ export class UserService {
 
   async updatePassword(user: User, password: string) {
     try {
-      const oldUser = await this.userRepository.findOne({userId: user.userId, username: user.username, password: user.password});
+      const oldUser = await this.userRepository.findOne({userId: user.userId, username: user.username});
       if(oldUser && passwordVerify(password)) {
         const newUser = JSON.parse(JSON.stringify(oldUser));
         newUser.password = password;
@@ -95,6 +95,21 @@ export class UserService {
       return {code: RCode.FAIL, msg:'更新失败', data: '' };
     } catch(e) {
       return {code: RCode.ERROR, msg: '更新用户密码失败', data: e };
+    }
+  }
+  async updateQQ(user: User) {
+    try {
+      const oldUser = await this.userRepository.findOne({userId: user.userId, username: user.username});
+      if(oldUser) {
+        const newUser = JSON.parse(JSON.stringify(oldUser));
+        newUser.qq = user.qq;
+        newUser.avatar =  `//q2.qlogo.cn/headimg_dl?dst_uin=${newUser.qq}&spec=100`;
+        await this.userRepository.update(oldUser, newUser);
+        return { msg:'更新用户QQ成功', data: newUser};
+      } 
+      return {code: RCode.FAIL, msg:'更新失败', data: '' };
+    } catch(e) {
+      return {code: RCode.ERROR, msg: '更新用户QQ失败', data: e };
     }
   }
 

@@ -9,6 +9,7 @@ const appState: AppState = {
   user: {
     userId: '',
     username: '',
+    qq:'',
     password: '',
     avatar: '',
     createTime: 0,

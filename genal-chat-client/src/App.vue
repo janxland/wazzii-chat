@@ -8,6 +8,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { DEFAULT_BACKGROUND } from '@/const';
+import { getSiteWebInfo }  from '@/api/apis';
 const appModule = namespace('app');
 
 @Component
@@ -19,11 +20,26 @@ export default class GenalChat extends Vue {
 
   mounted() {
     this.setMobile(this.isMobile());
+    this.webInfo();
     if (!this.background || !this.background.trim().length) {
       this.set_background(DEFAULT_BACKGROUND);
     }
   }
+  webInfo(){
+    getSiteWebInfo({id:5}).then(res=>{
+      if (res.data.code === 200 ){
 
+        let DATA = res.data;
+        console.log(DATA);
+        
+        let settings = JSON.parse(DATA.result[0].value);
+        localStorage.setItem("PLAYLIST_LIST",JSON.stringify(settings.PLAYLIST_LIST));
+        localStorage.setItem("EMOJI",JSON.stringify(settings.EMOJI));
+        localStorage.setItem("DEFAULT_WALLPAPER",JSON.stringify(settings.DEFAULT_WALLPAPER));
+        localStorage.getItem("favoriteWallpaper") || localStorage.setItem("favoriteWallpaper",JSON.stringify(settings.favoriteWallpaper));
+      }
+    })
+  }
   isMobile() {
     let flag = navigator.userAgent.match(
       /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i

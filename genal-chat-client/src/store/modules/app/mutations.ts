@@ -14,6 +14,7 @@ const mutations: MutationTree<AppState> = {
     state.user = {
       userId: '',
       username: '',
+      qq: '',
       password: '',
       avatar: '',
       createTime: 0,

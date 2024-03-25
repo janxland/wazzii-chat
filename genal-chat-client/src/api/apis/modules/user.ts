@@ -9,7 +9,15 @@ export const patchUserName = (params: User) => {
     ...params,
   });
 };
-
+/**
+ * 更新QQ
+ * @param params
+ */
+export const patchQQ = (user: User, QQ: string) => {
+  return fetch.patch(`/user/qq?qq=${QQ}`, {
+    ...user,
+  });
+};
 /**
  * 更新用户密码
  * @param user
@@ -21,6 +29,8 @@ export const patchPassword = (user: User, password: string) => {
     ...user,
   });
 };
+
+
 
 /**
  * 用户名模糊搜索用户
