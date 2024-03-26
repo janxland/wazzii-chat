@@ -5,16 +5,17 @@ import { ChatModule } from './modules/chat/chat.module';
 import { FriendModule } from './modules/friend/friend.module';
 import { GroupModule } from './modules/group/group.module';
 import { AuthModule } from './modules/auth/auth.module';
-
+require('dotenv').config();
+console.log(process.env);
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '47.113.184.243',
-      port: 3306,
+      host: process.env.MYSQL_HOST || 'localhost',
+      port: parseInt(process.env.MYSQL_PORT) || 3306,
       username: 'chat',
-      password: 'XdwsyZhA7AbLpSp5',
-      database: 'chat',
+      password: process.env.MYSQL_PASSWORD || "XdwsyZhA7AbLpSp5",
+      database: process.env.MYSQL_DATABASE || 'chat',
       charset: "utf8mb4", // 设置chatset编码为utf8mb4
       autoLoadEntities: true,
       synchronize: true
@@ -26,4 +27,5 @@ import { AuthModule } from './modules/auth/auth.module';
     AuthModule
   ],
 })
+
 export class AppModule {}

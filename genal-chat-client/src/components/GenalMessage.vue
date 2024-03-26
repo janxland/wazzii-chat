@@ -26,7 +26,7 @@
               <div class="message-content-text" ref="contentContainer" v-html="_parseText(item.content)" v-if="item.messageType === 'text'"></div>
               <div class="message-content-image" v-if="item.messageType === 'image'" :style="getImageStyle(item.content)">
                 <viewer style="display:flex;align-items:center;">
-                  <img :src="item.content" alt="" />
+                  <img @contextmenu.prevent="imageMenu(item.content)" :src="item.content" alt="" />
                 </viewer>
               </div>
             </div>
@@ -45,10 +45,10 @@ import GenalActive from './GenalActive.vue';
 import GenalInput from './GenalInput.vue';
 import * as api from '@/api/apis';
 import { namespace } from 'vuex-class';
+import Swal from 'sweetalert2';
 const chatModule = namespace('chat');
 const appModule = namespace('app');
 import { isUrl, parseText, processReturn } from '@/utils/common';
-
 @Component({
   components: {
     GenalActive,
@@ -325,6 +325,28 @@ export default class GenalMessage extends Vue {
    */
   _isUrl(text: string) {
     return isUrl(text);
+  }
+  /**
+   * 右键菜单
+   * @param content 
+   */
+  @appModule.Mutation('set_background') setBackground: Function;
+  async imageMenu(content: string) {
+    const result = await Swal.fire({
+      title: '确认操作',
+      text: '可以把图片设为背景哦！',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      
+      scrollbarPadding: true, // 添加这个选项来禁止遮罩层导致的滚动条
+      
+    });
+    if (result.isConfirmed) {
+      this.setBackground(content)
+    }
+    
   }
 }
 </script>

@@ -52,7 +52,7 @@ export class UserController {
   @Post('/avatar')
   @UseInterceptors(FileInterceptor('avatar'))
   setUserAvatar(@Body() user, @UploadedFile() file) {
-    return this.userService.setUserAvatar(user, file);
+    return this.userService.setUserAvatar(user);
   }
 
 }

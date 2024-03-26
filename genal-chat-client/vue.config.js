@@ -23,6 +23,7 @@ const cdn = {
 const CompressionWebpackPlugin = require('compression-webpack-plugin');
 
 module.exports = {
+  publicPath: process.env.NODE_ENV === "production" ? "https://mybox-1257251314.cos.ap-chengdu.myqcloud.com/www/wazzii-chat" : "/",
   chainWebpack: (config) => {
     // 需要打包分析时取消注释
     // config.plugin('webpack-bundle-analyzer').use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin);
@@ -84,7 +85,7 @@ module.exports = {
     },
   },
   // webSocket本身不存在跨域问题，所以我们可以利用webSocket来进行非同源之间的通信。
-  publicPath: '/',
+  // publicPath: '/',
   devServer: {
     port: 1997,
     proxy: {

@@ -9,7 +9,6 @@
       '--bg-image': `url('${background}')`,
     }"
   >
-    <genal-music></genal-music>
     <div class="chat-part1" v-if="visibleTool">
       <genal-tool @logout="logout"></genal-tool>
     </div>

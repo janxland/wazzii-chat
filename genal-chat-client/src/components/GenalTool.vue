@@ -1,7 +1,7 @@
 <template>
   <div class="tool">
     <div class="tool-avatar">
-      <div class="tool-avatar-img" @click="showUserInfo('showUserModal')">
+      <div class="tool-avatar-img" @click="showUserInfo()">
         <img v-if="user" :src="user.avatar" alt="" />
       </div>
       <div class="tool-avatar-name">{{ user.username }}</div>
@@ -11,12 +11,12 @@
         <div>请文明聊天</div>
         <div>截图粘贴可发送图片</div>
       </div>
-      <a-icon type="bulb" class="tool-tip icon" />
+      <a href="https://www.roginx.ink" target="_blank"><a-icon type="bulb" class="tool-tip icon" /></a>
     </a-tooltip>
     <a-icon type="skin" class="tool-skin icon" @click="showBackgroundModal = true" />
-    <a href="https://github.com/genaller/genal-chat" target="_blank" class="tool-github icon"><a-icon type="github"/></a>
+    <a href="https://github.com/janxland/wazzii-chat" target="_blank" class="tool-github icon"><a-icon type="github"/></a>
     <a-icon class="tool-out icon" type="poweroff" @click="logout" />
-    <a-modal style="width: 300px !important;" title="用户信息" :visible="showUserModal" footer="" @cancel="showUserModal = false">
+    <a-modal title="用户信息" :visible="showUserModal" footer="" @cancel="showUserModal = false">
       <div class="tool-user">
         <div
           @mouseover="showUpload = true"
@@ -120,8 +120,8 @@
           />
           <span class="text">少女</span>
         </div>
-        <div class="recommend" @click="setBackground('https://picb.zhimg.com/v2-263525f6c912d300abfa0eed3acbfd4b_r.jpg')">
-          <img src="https://picb.zhimg.com/v2-263525f6c912d300abfa0eed3acbfd4b_r.jpg" alt="" />
+        <div class="recommend" @click="setBackground(DEFAULT_WALLPAPER())">
+          <img :src="DEFAULT_WALLPAPER()" alt="" />
           <span class="text">猫咪</span>
         </div>
       </div>
@@ -131,11 +131,11 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
-import { setUserAvatar } from '@/api/apis';
+import { setUserAvatar, uploadImage } from '@/api/apis';
 import { DEFAULT_BACKGROUND, DEFAULT_GROUP } from '@/const/index';
 import { namespace } from 'vuex-class';
 import * as apis from '@/api/apis';
-import { processReturn, nameVerify, passwordVerify } from '@/utils/common.ts';
+import { processReturn, nameVerify, passwordVerify } from '@/utils/common';
 const appModule = namespace('app');
 const chatModule = namespace('chat');
 
@@ -144,7 +144,7 @@ export default class GenalTool extends Vue {
   @appModule.Getter('user') user: User;
   @appModule.Mutation('set_background') setBackground: Function;
   @appModule.Mutation('set_user') setUser: Function;
-
+  @appModule.Getter('mobile') mobile: boolean;
   @chatModule.Getter('socket') socket: SocketIOClient.Socket;
   @chatModule.Mutation('set_user_gather') setUserGather: Function;
 
@@ -165,7 +165,15 @@ export default class GenalTool extends Vue {
     this.password = this.user.password;
     this.qq = this.user.qq;
   }
-
+  DEFAULT_WALLPAPER(){
+    let DEFAULT_WALLPAPER_VALUE:any = localStorage.getItem("DEFAULT_WALLPAPER");
+    if(DEFAULT_WALLPAPER_VALUE){
+      let DEFAULT_WALLPAPER = JSON.parse(DEFAULT_WALLPAPER_VALUE)
+      return this.mobile?DEFAULT_WALLPAPER.PE : DEFAULT_WALLPAPER.PC
+    } else {
+      return this.$store.state.webInfo.backgroundImage
+    }
+  }
   created() {
     this.username = this.user.username;
     this.password = this.user.password;
@@ -227,8 +235,9 @@ export default class GenalTool extends Vue {
     }
   }
   beforeUpload(file: any) {
-    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpg' || file.type === 'image/gif';
-    if (!isJpgOrPng) {
+    const supportedImageExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp'];
+    const fileExtension = file.type.split('/')[1].toLowerCase();
+    if (!supportedImageExtensions.includes(fileExtension)) {
       return this.$message.error('请上传jpeg/jpg/png/gif格式的图片!');
     }
     const isLt1M = file.size / 1024 / 1024 < 0.5;
@@ -243,21 +252,30 @@ export default class GenalTool extends Vue {
   async handleUpload() {
     this.uploading = true;
     const formData = new FormData();
-    formData.append('avatar', this.avatar);
-    formData.append('userId', this.user.userId);
-    formData.append('password', this.user.password);
-    let data = processReturn(await setUserAvatar(formData));
-    if (data) {
-      this.setUser(data);
-      this.setUserGather(data);
-      this.uploading = false;
-      this.showUpload = false;
-      // 通知其他用户个人信息改变
-      this.socket.emit('joinGroupSocket', {
-        groupId: DEFAULT_GROUP,
-        userId: data.userId,
-      });
-    }
+    formData.append('smfile',this.avatar, this.avatar.name);
+    formData.append('file_id', "0");
+    formData.append('nsfw', "0");
+    uploadImage(formData).then(async response => {
+      let imageUrl ;
+      let formData = new FormData();
+      response.data.data.url?(imageUrl = response.data.data.url) : (imageUrl = response.data.images)
+      formData.append('avatar', imageUrl);
+      formData.append('userId', this.user.userId);
+      formData.append('password', this.user.password);
+      let data = processReturn(await setUserAvatar(formData));
+      if (data) {
+        this.setUser(data);
+        this.setUserGather(data);
+        this.uploading = false;
+        this.showUpload = false;
+        // 通知其他用户个人信息改变
+        this.socket.emit('joinGroupSocket', {
+          groupId: DEFAULT_GROUP,
+          userId: data.userId,
+        });
+      }
+    })
+
   }
 
   changeBackground() {

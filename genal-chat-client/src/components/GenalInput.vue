@@ -258,8 +258,7 @@ export default class GenalInput extends Vue {
       formData.append('file_id', "0");
       formData.append('nsfw', "0");
       uploadImage(formData).then(response => {
-        let imageUrl ;
-        response.data.data.url?(imageUrl = response.data.data.url) : (imageUrl = response.data.images)
+        let imageUrl = response.data.images || response.data.data.url;
         this.sendMessage({
           type: this.activeRoom.groupId ? 'group' : 'friend',
           message:  imageUrl,

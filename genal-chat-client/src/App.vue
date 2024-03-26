@@ -1,6 +1,9 @@
 <template>
   <div id="app">
     <router-view />
+    <!-- <div  v-drag>
+      <genal-music></genal-music>
+    </div> -->
     <img class="background" v-if="background" :src="background" alt="" />
   </div>
 </template>
@@ -9,9 +12,14 @@ import { Component, Vue } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { DEFAULT_BACKGROUND } from '@/const';
 import { getSiteWebInfo }  from '@/api/apis';
+import GenalMusic from '@/components/GenalMusic.vue';
 const appModule = namespace('app');
 
-@Component
+@Component({
+  components: {
+    GenalMusic
+  },
+})
 export default class GenalChat extends Vue {
   @appModule.Getter('user') user: User;
   @appModule.Getter('background') background: string;
@@ -49,6 +57,16 @@ export default class GenalChat extends Vue {
 }
 </script>
 <style lang="scss">
+body {
+  zoom: 1;
+  width: 100vw !important;
+  height: 100vh !important;
+  padding: 0;
+  margin: 0;
+}
+body.swal2-height-auto{
+  height: 100vh !important;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -58,6 +76,7 @@ export default class GenalChat extends Vue {
   align-items: center;
   text-align: center;
   height: 100%;
+  position: relative;
   width: 100%;
   overflow: hidden;
   background-size: cover;
